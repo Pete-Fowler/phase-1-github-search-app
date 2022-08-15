@@ -1,13 +1,35 @@
 const form = document.querySelector('#github-form');
+const reposList = document.querySelector('ul#repos-list');
+
+const renderRepos = (data) => {
+  reposList.textContent = '';
+  for(const projectObj in data) {
+    const project = data[projectObj];
+    
+    const name = document.createElement('a');
+    name.textContent = project.name;
+    name.setAttribute('href', project.html_url);
+    const forks = document.createElement('p');
+    forks.textContent = `Forks: ${project.forks}`;
+    const pushed = document.createElement('p');
+    pushed.textContent = `Last commit: ${project.pushed_at.slice(0, 10)}`;
+
+    const li = document.createElement('li');
+    li.append(name, forks, pushed);
+    reposList.append(li);
+  }
+}
 
 const repoSearch = (user) => {
   return fetch(`https://api.github.com/users/${user}/repos`)
   .then(res => res.json())
-  .then(data => console.log(data));
+  .then(data => renderRepos(data));
 }
 
-const render = (data) => {
+const renderUsers = (data) => {
   const userList = document.querySelector('ul#user-list');
+  userList.textContent = '';
+  reposList.textContent = '';
   const users = data.items;
   for(user in users) {
     const key = users[user];
@@ -45,7 +67,7 @@ const userSearch = (e) => {
   const term = form.search.value;
   return fetch(`https://api.github.com/search/users?q=${term}`)
   .then(response => response.json())
-  .then(data => render(data));
+  .then(data => renderUsers(data));
 }
 
 form.addEventListener('submit', userSearch);
